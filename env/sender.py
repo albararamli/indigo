@@ -7,6 +7,7 @@ from os import path
 import numpy as np
 import datagram_pb2
 import project_root
+import Queue
 from helpers.helpers import (
     curr_ts_ms, apply_op,
     READ_FLAGS, ERR_FLAGS, READ_ERR_FLAGS, WRITE_FLAGS, ALL_FLAGS)
@@ -45,7 +46,7 @@ class Sender(object):
 
         self.poller = select.poll()
         self.poller.register(self.sock, ALL_FLAGS)
-
+        self.queue = Queue.Queue()
         self.dummy_payload = 'x' * 1400
 
         if self.debug:
@@ -80,7 +81,19 @@ class Sender(object):
         if self.debug and self.sampling_file:
             self.sampling_file.close()
         self.sock.close()
-
+    # TODO: customized methods
+    def qsize(self):
+        return self.queue.qsize()
+    def enqueue(self, package):
+        self.queue.put(package)
+    def set_conn(self, conn):
+        self.conn = conn
+    def send_to_conn(self): 
+        if self.queue.empty():
+            return
+        self.conn.send(self.queue.get())
+        return
+    # TODO: customized methods ends 
     def handshake(self):
         """Handshake with peer receiver. Must be called before run()."""
 
