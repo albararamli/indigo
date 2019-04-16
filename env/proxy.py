@@ -11,6 +11,8 @@ from sender import Sender
 from dagger.run_sender import get_sender
 from run_receiver import get_receiver
 from contextlib import closing
+from threading import Thread, Lock
+mutex = Lock()
 
 #********* CONSTANT VARIABLES *********
 BACKLOG = 50            # how many pending connections queue will hold
@@ -63,10 +65,14 @@ def main():
 #************** END MAIN PROGRAM ***************
 
 def find_free_port():
+    mutex.acquire()
+    port = 0
     with closing(socket.socket(socket.AF_INET, socket.SOCK_STREAM)) as s:
         s.bind(('', 0))
         s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-        return s.getsockname()[1]
+        port = s.getsockname()[1]
+    mutex.release()
+    return port
 
 def printout(type,request,address):
     if "Block" in type or "Blacklist" in type:
@@ -155,7 +161,7 @@ def proxy_thread(conn, client_addr):
                 # send to browser
                 ccsender.enqueue(data)
                 print str(ccsender.qsize())
-                ccsender.send_to_conn()
+                # ccsender.send_to_conn()
                 # conn.send(data)
             else:
                 break

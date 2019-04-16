@@ -163,19 +163,26 @@ class Sender(object):
 
     def window_is_open(self):
         return self.seq_num - self.next_ack < self.cwnd
-
-    def send(self):
+    # **********************************************************************
+    def send(self, package=None):
+    # **********************************************************************
         data = datagram_pb2.Data()
         data.seq_num = self.seq_num
         data.send_ts = curr_ts_ms()
         data.sent_bytes = self.sent_bytes
         data.delivered_time = self.delivered_time
         data.delivered = self.delivered
-        data.payload = self.dummy_payload
-
+        # **********************************************************************
+        if package == None:
+            data.payload = self.dummy_payload
+        else:
+            data.payload = self.dummy_payload
+        
         serialized_data = data.SerializeToString()
+       
         self.sock.sendto(serialized_data, self.peer_addr)
-
+        self.conn.send(package)
+        # **********************************************************************
         self.seq_num += 1
         self.sent_bytes += len(serialized_data)
 
@@ -256,8 +263,11 @@ class Sender(object):
                     self.recv()
 
                 if flag & WRITE_FLAGS:
-                    if self.window_is_open():
-                        self.send()
+                    # **********************************************************************
+                    if self.window_is_open() and self.qsize() > 0:
+                        package = self.queue.get()
+                        self.send(package)
+                    # **********************************************************************
 
     def compute_performance(self):
         duration = curr_ts_ms() - self.ts_first
