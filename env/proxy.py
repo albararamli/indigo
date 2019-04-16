@@ -9,6 +9,7 @@
 import os,sys,thread,socket
 from sender import Sender
 from dagger.run_sender import get_sender
+from run_receiver import get_receiver
 from contextlib import closing
 
 #********* CONSTANT VARIABLES *********
@@ -77,6 +78,14 @@ def printout(type,request,address):
 
     print "\033[",colornum,"m",address[0],"\t",type,"\t",request,"\033[0m"
 
+def start_cc(cc_endpoint):
+    try:
+        cc_endpoint.handshake()
+        cc_endpoint.run()
+    except KeyboardInterrupt:
+        pass
+    finally:
+        cc_endpoint.cleanup()
 #*******************************************
 #********* PROXY_THREAD FUNC ***************
 # A thread to handle request from browser
@@ -86,7 +95,9 @@ def proxy_thread(conn, client_addr):
     print '******************************************************'
     ccsender = get_sender(port)
     ccsender.set_conn(conn)
-    port += 1
+    thread.start_new_thread(start_cc, (ccsender,))
+    ccreceiver = get_receiver('127.0.0.1', port)
+    thread.start_new_thread(start_cc, (ccreceiver,))
     # get the request from browser
     request = conn.recv(MAX_DATA_RECV)
 
@@ -150,6 +161,7 @@ def proxy_thread(conn, client_addr):
                 break
         s.close()
         conn.close()
+        # TODO: kill receiver
     except socket.error, (value, message):
         if s:
             s.close()

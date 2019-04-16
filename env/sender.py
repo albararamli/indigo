@@ -92,7 +92,6 @@ class Sender(object):
         if self.queue.empty():
             return
         self.conn.send(self.queue.get())
-        return
     # TODO: customized methods ends 
     def handshake(self):
         """Handshake with peer receiver. Must be called before run()."""

@@ -35,6 +35,17 @@ def main():
     finally:
         receiver.cleanup()
 
+def get_receiver(ip, port):
+    receiver = Receiver(ip, port)
+    return receiver
+    # try:
+    #     receiver.handshake()
+    #     receiver.run()
+    # except KeyboardInterrupt:
+    #     pass
+    # finally:
+    #     receiver.cleanup()
+
 
 if __name__ == '__main__':
     main()
