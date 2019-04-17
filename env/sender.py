@@ -46,7 +46,10 @@ class Sender(object):
 
         self.poller = select.poll()
         self.poller.register(self.sock, ALL_FLAGS)
+        # store packages received from server, wait for processing
         self.queue = Queue.Queue()
+        # store packages ready to be sent to browser
+        self.sendQueue = Queue.Queue()
         self.dummy_payload = 'x' * 1400
 
         if self.debug:
@@ -173,10 +176,7 @@ class Sender(object):
         data.delivered_time = self.delivered_time
         data.delivered = self.delivered
         # **********************************************************************
-        if package == None:
-            data.payload = self.dummy_payload
-        else:
-            data.payload = self.dummy_payload
+        data.payload = self.dummy_payload
         
         serialized_data = data.SerializeToString()
        
@@ -260,13 +260,17 @@ class Sender(object):
                     sys.exit('Error occurred to the channel')
 
                 if flag & READ_FLAGS:
+                    print 'receive ACK from receiver'
                     self.recv()
+                    if not self.sendQueue.empty():
+                        self.conn.send(self.sendQueue.get())
 
                 if flag & WRITE_FLAGS:
                     # **********************************************************************
                     if self.window_is_open() and self.qsize() > 0:
                         package = self.queue.get()
-                        self.send(package)
+                        self.sendQueue.put(package)
+                        print 'sendQueue size: ' + str(self.sendQueue.qsize())
                     # **********************************************************************
 
     def compute_performance(self):

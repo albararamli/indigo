@@ -87,6 +87,7 @@ class Receiver(object):
             serialized_data, addr = self.sock.recvfrom(1600)
 
             if addr == self.peer_addr:
+                print '___________receiver get packages'
                 ack = self.construct_ack_from_data(serialized_data)
                 if ack is not None:
                     self.sock.sendto(ack, self.peer_addr)
