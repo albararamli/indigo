@@ -167,7 +167,7 @@ class Sender(object):
     def window_is_open(self):
         return self.seq_num - self.next_ack < self.cwnd
     # **********************************************************************
-    def send(self, package=None):
+    def send(self):
     # **********************************************************************
         data = datagram_pb2.Data()
         data.seq_num = self.seq_num
@@ -181,7 +181,6 @@ class Sender(object):
         serialized_data = data.SerializeToString()
        
         self.sock.sendto(serialized_data, self.peer_addr)
-        self.conn.send(package)
         # **********************************************************************
         self.seq_num += 1
         self.sent_bytes += len(serialized_data)
@@ -268,6 +267,7 @@ class Sender(object):
                 if flag & WRITE_FLAGS:
                     # **********************************************************************
                     if self.window_is_open() and self.qsize() > 0:
+                        self.send()
                         package = self.queue.get()
                         self.sendQueue.put(package)
                         print 'sendQueue size: ' + str(self.sendQueue.qsize())

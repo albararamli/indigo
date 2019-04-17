@@ -82,7 +82,7 @@ class Receiver(object):
 
     def run(self):
         self.sock.setblocking(1)  # blocking UDP socket
-
+        print '___________receiver running'
         while True:
             serialized_data, addr = self.sock.recvfrom(1600)
 
