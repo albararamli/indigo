@@ -259,7 +259,7 @@ class Sender(object):
                     sys.exit('Error occurred to the channel')
 
                 if flag & READ_FLAGS:
-                    print 'receive ACK from receiver'
+                    # print 'receive ACK from receiver'
                     self.recv()
                     if not self.sendQueue.empty():
                         self.conn.send(self.sendQueue.get())
@@ -270,7 +270,7 @@ class Sender(object):
                         self.send()
                         package = self.queue.get()
                         self.sendQueue.put(package)
-                        print 'sendQueue size: ' + str(self.sendQueue.qsize())
+                        # print 'sendQueue size: ' + str(self.sendQueue.qsize())
                     # **********************************************************************
 
     def compute_performance(self):

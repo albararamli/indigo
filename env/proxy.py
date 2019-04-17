@@ -157,11 +157,7 @@ def proxy_thread(conn, client_addr):
             # receive data from web server
             data = s.recv(MAX_DATA_RECV)
             if (len(data) > 0):
-                # send to browser
                 ccsender.enqueue(data)
-                print str(ccsender.qsize())
-                # ccsender.send_to_conn()
-                # conn.send(data)
             else:
                 break
         s.close()

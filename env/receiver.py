@@ -82,12 +82,12 @@ class Receiver(object):
 
     def run(self):
         self.sock.setblocking(1)  # blocking UDP socket
-        print '___________receiver running'
+        # print '___________receiver running'
         while True:
             serialized_data, addr = self.sock.recvfrom(1600)
 
             if addr == self.peer_addr:
-                print '___________receiver get packages'
+                # print '___________receiver get packages'
                 ack = self.construct_ack_from_data(serialized_data)
                 if ack is not None:
                     self.sock.sendto(ack, self.peer_addr)
