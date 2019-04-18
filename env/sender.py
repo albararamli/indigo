@@ -50,6 +50,7 @@ class Sender(object):
         self.queue = Queue.Queue()
         # store packages ready to be sent to browser
         self.sendQueue = Queue.Queue()
+        self.conn_close = False
         self.dummy_payload = 'x' * 1400
 
         if self.debug:
@@ -259,18 +260,21 @@ class Sender(object):
                     sys.exit('Error occurred to the channel')
 
                 if flag & READ_FLAGS:
-                    # print 'receive ACK from receiver'
                     self.recv()
                     if not self.sendQueue.empty():
                         self.conn.send(self.sendQueue.get())
+                    elif self.conn_close:
+                        self.conn.close()
 
                 if flag & WRITE_FLAGS:
                     # **********************************************************************
                     if self.window_is_open() and self.qsize() > 0:
-                        self.send()
                         package = self.queue.get()
+                        if len(package) == 0:
+                            self.conn_close = True
+                            continue
                         self.sendQueue.put(package)
-                        # print 'sendQueue size: ' + str(self.sendQueue.qsize())
+                        self.send()
                     # **********************************************************************
 
     def compute_performance(self):

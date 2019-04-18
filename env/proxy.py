@@ -12,11 +12,12 @@ from dagger.run_sender import get_sender
 from run_receiver import get_receiver
 from contextlib import closing
 from threading import Thread, Lock
+import time
 mutex = Lock()
 
 #********* CONSTANT VARIABLES *********
 BACKLOG = 50            # how many pending connections queue will hold
-MAX_DATA_RECV = 999999  # max number of bytes we receive at once
+MAX_DATA_RECV = 1500  # max number of bytes we receive at once
 DEBUG = True            # set to True to see the debug msgs
 BLOCKED = []            # just an example. Remove with [""] for no blocking at all.
 
@@ -152,16 +153,15 @@ def proxy_thread(conn, client_addr):
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)  
         s.connect((webserver, port))
         s.send(request)         # send request to webserver
-        
         while 1:
             # receive data from web server
             data = s.recv(MAX_DATA_RECV)
-            if (len(data) > 0):
-                ccsender.enqueue(data)
-            else:
+            ccsender.enqueue(data)
+            if (len(data) == 0):
                 break
         s.close()
-        conn.close()
+        # conn.close()
+
         # TODO: kill receiver
     except socket.error, (value, message):
         if s:
