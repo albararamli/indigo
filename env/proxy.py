@@ -12,7 +12,7 @@ from dagger.run_sender import get_sender
 from run_receiver import get_receiver
 from contextlib import closing
 from threading import Thread, Lock
-import time
+import time, subprocess
 mutex = Lock()
 
 #********* CONSTANT VARIABLES *********
@@ -103,8 +103,13 @@ def proxy_thread(conn, client_addr):
     ccsender = get_sender(port)
     ccsender.set_conn(conn)
     thread.start_new_thread(start_cc, (ccsender,))
-    ccreceiver = get_receiver('127.0.0.1', port)
-    thread.start_new_thread(start_cc, (ccreceiver,))
+    # ccreceiver = get_receiver('127.0.0.1', port)
+    # thread.start_new_thread(start_cc, (ccreceiver,))
+    command_r = "src/wrappers/indigo.py receiver 127.0.0.1 " + str(port)
+    subprocess.Popen(command_r, stdout=subprocess.PIPE, shell=True)
+    
+
+
     # get the request from browser
     request = conn.recv(MAX_DATA_RECV)
 
