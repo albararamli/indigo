@@ -50,7 +50,7 @@ class Receiver(object):
         while True:
             self.sock.sendto('Hello from receiver', self.peer_addr)
             events = self.poller.poll(TIMEOUT)
-            print('send hello to sender')
+
             if not events:  # timed out
                 retry_times += 1
                 if retry_times > 10:
@@ -70,7 +70,7 @@ class Receiver(object):
 
                 if flag & READ_FLAGS:
                     msg, addr = self.sock.recvfrom(1600)
-                    addr == self.peer_addr
+                    addr = self.peer_addr
                     if addr == self.peer_addr:
                         if msg != 'Hello from sender':
                             # 'Hello from sender' was presumably lost
@@ -79,7 +79,7 @@ class Receiver(object):
                             if ack is not None:
                                 self.sock.sendto(ack, self.peer_addr)
                         return
-
+   
     def run(self):
         self.sock.setblocking(1)  # blocking UDP socket
         while True:

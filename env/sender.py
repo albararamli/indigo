@@ -104,15 +104,14 @@ class Sender(object):
             msg, addr = self.sock.recvfrom(1600)
 
             if msg == 'Hello from receiver' and self.peer_addr is None:
-                print('@@@@@@@@@@@@@@@@receive hello from receiver', addr)
-                self.peer_addr = addr       
-                print(self.peer_addr)
+                self.peer_addr = addr
                 self.sock.sendto('Hello from sender', self.peer_addr)
                 sys.stderr.write('[sender] Handshake success! '
                                  'Receiver\'s address is %s:%s\n' % addr)
                 break
 
         self.sock.setblocking(0)  # non-blocking UDP socket
+
 
     def set_sample_action(self, sample_action):
         """Set the policy. Must be called before run()."""
@@ -276,7 +275,6 @@ class Sender(object):
                             self.conn_close = True
                             continue
                         self.sendQueue.put(package)
-                        print(package)
                         self.send()
                     # **********************************************************************
 
