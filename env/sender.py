@@ -104,7 +104,9 @@ class Sender(object):
             msg, addr = self.sock.recvfrom(1600)
 
             if msg == 'Hello from receiver' and self.peer_addr is None:
-                self.peer_addr = addr
+                print('@@@@@@@@@@@@@@@@receive hello from receiver', addr)
+                self.peer_addr = addr       
+                print(self.peer_addr)
                 self.sock.sendto('Hello from sender', self.peer_addr)
                 sys.stderr.write('[sender] Handshake success! '
                                  'Receiver\'s address is %s:%s\n' % addr)
@@ -188,7 +190,7 @@ class Sender(object):
 
     def recv(self):
         serialized_ack, addr = self.sock.recvfrom(1600)
-
+        print(serialized_ack)
         if addr != self.peer_addr:
             return
 
