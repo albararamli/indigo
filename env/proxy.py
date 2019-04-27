@@ -105,7 +105,10 @@ def proxy_thread(conn, client_addr):
     thread.start_new_thread(start_cc, (ccsender,))
     # ccreceiver = get_receiver('127.0.0.1', port)
     # thread.start_new_thread(start_cc, (ccreceiver,))
-    command_r = "mm-delay 10 src/wrappers/indigo.py receiver 168.150.3.164 " + str(port)
+    fff=open("../ip.txt","r")
+    ip=fff.read()
+    ip=ip.rstrip()
+    command_r = "mm-delay 10 src/wrappers/indigo.py receiver " + ip + " " + str(port)
     subprocess.Popen(command_r, stdout=subprocess.PIPE, shell=True)
     
 

@@ -190,7 +190,7 @@ class Sender(object):
 
     def recv(self):
         serialized_ack, addr = self.sock.recvfrom(1600)
-        print(serialized_ack)
+
         if addr != self.peer_addr:
             return
 
@@ -276,6 +276,7 @@ class Sender(object):
                             self.conn_close = True
                             continue
                         self.sendQueue.put(package)
+                        print(package)
                         self.send()
                     # **********************************************************************
 
