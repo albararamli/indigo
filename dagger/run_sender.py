@@ -14,7 +14,7 @@
 #     See the License for the specific language governing permissions and
 #     limitations under the License.
 
-
+import os
 import argparse
 import project_root
 import numpy as np
@@ -77,11 +77,12 @@ class Learner(object):
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('port', type=int)
+    parser.add_argument('thid', type=int)
     parser.add_argument('--debug', action='store_true')
     args = parser.parse_args()
-
-    sender = Sender(args.port, debug=args.debug)
-
+    #os.system('echo "===('+str(args.thid)+')===" >>~/0044.txt')
+    sender = Sender(args.port,args.thid, debug=args.debug) #
+    
     model_path = path.join(project_root.DIR, 'dagger', 'model', 'model')
 
     learner = Learner(
@@ -100,18 +101,5 @@ def main():
         sender.cleanup()
 
 
-def get_sender(port):
-    sender = Sender(port)
-
-    model_path = path.join(project_root.DIR, 'dagger', 'model', 'model')
-
-    learner = Learner(
-        state_dim=Sender.state_dim,
-        action_cnt=Sender.action_cnt,
-        restore_vars=model_path)
-
-    sender.set_sample_action(learner.sample_action)
-    return sender
- 
 if __name__ == '__main__':
     main()
