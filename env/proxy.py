@@ -6,26 +6,30 @@
 #                                                   *
 #****************************************************
 
+
 import os,sys,thread,socket
 from sender import Sender
-from dagger.run_sender import get_sender
-from run_receiver import get_receiver
+#from dagger.run_sender import get_sender
+#from run_receiver import get_receiver
 from contextlib import closing
 from threading import Thread, Lock
 import time, subprocess
-mutex = Lock()
+from time import sleep
+import glob
+
+#mutex=Lock()
 
 #********* CONSTANT VARIABLES *********
 BACKLOG = 50            # how many pending connections queue will hold
 MAX_DATA_RECV = 1500  # max number of bytes we receive at once
 DEBUG = True            # set to True to see the debug msgs
 BLOCKED = []            # just an example. Remove with [""] for no blocking at all.
-
+TH_ID_G=0
 #**************************************
 #********* MAIN PROGRAM ***************
 #**************************************
 def main():
-
+    os.system("rm -fR data/*")
     # check the length of command running
     if (len(sys.argv)<2):
         print "No port given, using :8080 (http-alt)" 
@@ -41,8 +45,7 @@ def main():
     try:
         # create a socket
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-
+        s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1) # reuse the port -albara
         # associate the socket to host and port
         s.bind((host, port))
 
@@ -65,16 +68,6 @@ def main():
     s.close()
 #************** END MAIN PROGRAM ***************
 
-def find_free_port():
-    mutex.acquire()
-    port = 0
-    with closing(socket.socket(socket.AF_INET, socket.SOCK_STREAM)) as s:
-        s.bind(('', 0))
-        s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-        port = s.getsockname()[1]
-    mutex.release()
-    return port
-
 def printout(type,request,address):
     if "Block" in type or "Blacklist" in type:
         colornum = 91
@@ -85,33 +78,58 @@ def printout(type,request,address):
 
     print "\033[",colornum,"m",address[0],"\t",type,"\t",request,"\033[0m"
 
-def start_cc(cc_endpoint):
-    try:
-        cc_endpoint.handshake()
-        cc_endpoint.run()
-    except KeyboardInterrupt:
-        pass
-    finally:
-        cc_endpoint.cleanup()
+def find_free_port():
+    #mutex.acquire()
+    port = 0
+    with closing(socket.socket(socket.AF_INET, socket.SOCK_STREAM)) as s:
+        s.bind(('', 0))
+        s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        port = s.getsockname()[1]
+    #mutex.release()
+    return port
+
 #*******************************************
 #********* PROXY_THREAD FUNC ***************
 # A thread to handle request from browser
 #*******************************************
+def proxy_thread2(TH_ID,arrx, conn,ooo):
+    print("Yiefe="+str(TH_ID))
+    while 1:
+        l=glob.glob('/home/arramli/aaa/pantheon/data/'+str(TH_ID)+'_*D.txt')
+        for fname in l:
+            print(fname)
+            os.system("rm "+fname)
+            os.system("rm "+  fname.replace("D.txt", "IN.txt"))
+            data = arrx[   int(fname.split('_')[1])   ]
+            conn.send(data)
+        if ooo[0]==1:
+            ooo[0]=2
+            os.system("touch "+  fname.replace("D.txt", "X.txt"))
+
 def proxy_thread(conn, client_addr):
-    port = find_free_port()
-    print '******************************************************'
-    ccsender = get_sender(port)
-    ccsender.set_conn(conn)
-    thread.start_new_thread(start_cc, (ccsender,))
-    # ccreceiver = get_receiver('127.0.0.1', port)
-    # thread.start_new_thread(start_cc, (ccreceiver,))
+    #mutex.acquire()
+    global TH_ID_G
+    TH_ID=TH_ID_G
+    TH_ID_G=TH_ID_G+1
+    ######################################
     fff=open("../ip.txt","r")
     ip=fff.read()
     ip=ip.rstrip()
-    command_r = "mm-delay 10 src/wrappers/indigo.py receiver " + ip + " " + str(port)
-    subprocess.Popen(command_r, stdout=subprocess.PIPE, shell=True)
-    
+    port = find_free_port()
+    ######################################
+    command_s = "src/wrappers/indigo.py sender " + str(port) + " "+str(TH_ID)#mm-delay 10 
+    #os.system(command_s)
+    os.system('gnome-terminal -e '+"'"+'sh -c "'+command_s+ ';exec bash"'+"'")
 
+    #subprocess.Popen(command_s, stdout=subprocess.PIPE, shell=True)
+    ######################################
+    command_r = "src/wrappers/indigo.py receiver " + ip + " " + str(port) #mm-delay 10 
+    #os.system(command_r)
+    os.system('gnome-terminal -e '+"'"+'sh -c "'+command_r+ ';exec bash"'+"'")
+    #subprocess.Popen(command_r, stdout=subprocess.PIPE, shell=True)
+    ######################################
+    #mutex.release()
+    D_ID=0
 
     # get the request from browser
     request = conn.recv(MAX_DATA_RECV)
@@ -155,22 +173,37 @@ def proxy_thread(conn, client_addr):
     else:       # specific port
         port = int((temp[(port_pos+1):])[:webserver_pos-port_pos-1])
         webserver = temp[:port_pos]
-
+    ooo={}
+    ooo[0]=0
     try:
         # create a socket to connect to the web server
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)  
         s.connect((webserver, port))
         s.send(request)         # send request to webserver
+        arrx = {}
+        thread.start_new_thread(proxy_thread2, (TH_ID, arrx, conn,ooo))
+
         while 1:
             # receive data from web server
             data = s.recv(MAX_DATA_RECV)
-            ccsender.enqueue(data)
-            if (len(data) == 0):
-                break
-        s.close()
-        # conn.close()
+            
+            if (len(data) > 0):
+                fff=open("data/"+str(TH_ID)+"_"+str(D_ID)+"_IN.txt","w")
+                fff.close()
+                # send to browser
+                ###conn.send(data)
+                arrx[D_ID]=data
+                D_ID=D_ID+1
+            else:
+                if ooo[0]=="2":
+                    break
+                else:
+                    ooo[0]="1"
+                   
 
-        # TODO: kill receiver
+        s.close()
+        conn.close()
+
     except socket.error, (value, message):
         if s:
             s.close()
@@ -182,4 +215,5 @@ def proxy_thread(conn, client_addr):
     
 if __name__ == '__main__':
     main()
+
 

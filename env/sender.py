@@ -1,3 +1,18 @@
+# Copyright 2018 Francis Y. Yan, Jestin Ma
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+#     Unless required by applicable law or agreed to in writing, software
+#     distributed under the License is distributed on an "AS IS" BASIS,
+#     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#     See the License for the specific language governing permissions and
+#     limitations under the License.
+
+import os
 import time
 import sys
 import json
@@ -7,7 +22,6 @@ from os import path
 import numpy as np
 import datagram_pb2
 import project_root
-import Queue
 from helpers.helpers import (
     curr_ts_ms, apply_op,
     READ_FLAGS, ERR_FLAGS, READ_ERR_FLAGS, WRITE_FLAGS, ALL_FLAGS)
@@ -31,26 +45,20 @@ class Sender(object):
     action_mapping = format_actions(["/2.0", "-10.0", "+0.0", "+10.0", "*2.0"])
     action_cnt = len(action_mapping)
 
-    def __init__(self, port=0, train=False, debug=False):
+    def __init__(self, port=0, thid=0, train=False, debug=False):
         self.train = train
         self.debug = debug
-
         # UDP socket and poller
         self.peer_addr = None
-
+        self.thid = thid
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         self.sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         self.sock.bind(('0.0.0.0', port))
-        sys.stderr.write('[sender] Listening on port %s\n' %
-                         self.sock.getsockname()[1])
-
+        #sys.stderr.write('[sender, (((tid = %d)))] Listening on port %s\n' % self.thid, self.sock.getsockname()[1])
+        #os.system('echo "===('+str(thid)+')===" >>~/0044.txt')
         self.poller = select.poll()
         self.poller.register(self.sock, ALL_FLAGS)
-        # store packages received from server, wait for processing
-        self.queue = Queue.Queue()
-        # store packages ready to be sent to browser
-        self.sendQueue = Queue.Queue()
-        self.conn_close = False
+
         self.dummy_payload = 'x' * 1400
 
         if self.debug:
@@ -85,18 +93,7 @@ class Sender(object):
         if self.debug and self.sampling_file:
             self.sampling_file.close()
         self.sock.close()
-    # TODO: customized methods
-    def qsize(self):
-        return self.queue.qsize()
-    def enqueue(self, package):
-        self.queue.put(package)
-    def set_conn(self, conn):
-        self.conn = conn
-    def send_to_conn(self): 
-        if self.queue.empty():
-            return
-        self.conn.send(self.queue.get())
-    # TODO: customized methods ends 
+
     def handshake(self):
         """Handshake with peer receiver. Must be called before run()."""
 
@@ -111,7 +108,6 @@ class Sender(object):
                 break
 
         self.sock.setblocking(0)  # non-blocking UDP socket
-
 
     def set_sample_action(self, sample_action):
         """Set the policy. Must be called before run()."""
@@ -168,22 +164,19 @@ class Sender(object):
 
     def window_is_open(self):
         return self.seq_num - self.next_ack < self.cwnd
-    # **********************************************************************
+
     def send(self):
-    # **********************************************************************
         data = datagram_pb2.Data()
         data.seq_num = self.seq_num
         data.send_ts = curr_ts_ms()
         data.sent_bytes = self.sent_bytes
         data.delivered_time = self.delivered_time
         data.delivered = self.delivered
-        # **********************************************************************
         data.payload = self.dummy_payload
-        
+
         serialized_data = data.SerializeToString()
-       
         self.sock.sendto(serialized_data, self.peer_addr)
-        # **********************************************************************
+
         self.seq_num += 1
         self.sent_bytes += len(serialized_data)
 
@@ -238,7 +231,7 @@ class Sender(object):
 
         self.poller.modify(self.sock, ALL_FLAGS)
         curr_flags = ALL_FLAGS
-
+        fname=""
         while self.running:
             if self.window_is_open():
                 if curr_flags != ALL_FLAGS:
@@ -261,22 +254,25 @@ class Sender(object):
                     sys.exit('Error occurred to the channel')
 
                 if flag & READ_FLAGS:
-                    self.recv()
-                    if not self.sendQueue.empty():
-                        self.conn.send(self.sendQueue.get())
-                    elif self.conn_close:
-                        self.conn.close()
+                    os.system("touch " + fname.replace("IN.txt", "D.txt"))
+                    fname=""
+                    self.recv() 
 
                 if flag & WRITE_FLAGS:
-                    # **********************************************************************
-                    if self.window_is_open() and self.qsize() > 0:
-                        package = self.queue.get()
-                        if len(package) == 0:
-                            self.conn_close = True
-                            continue
-                        self.sendQueue.put(package)
-                        self.send()
-                    # **********************************************************************
+                    if self.window_is_open():
+                        if fname=="":
+                            l=glob.glob('/home/arramli/aaa/pantheon/data/'+str(self.thid)+'_*IN.txt')
+                            if len(l)>0:
+                                fname= l[0]
+                                os.system("rm "+ fname)
+                                #os.system("mv "+ fname + ' ' +  fname.replace("IN.txt", "D.txt"))
+                                self.send()
+                            l=glob.glob('/home/arramli/aaa/pantheon/data/'+str(self.thid)+'_*X.txt')
+                            if len(l)>0:
+                                exit()
+
+
+
 
     def compute_performance(self):
         duration = curr_ts_ms() - self.ts_first

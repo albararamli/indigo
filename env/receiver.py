@@ -1,3 +1,18 @@
+# Copyright 2018 Francis Y. Yan, Jestin Ma
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+#     Unless required by applicable law or agreed to in writing, software
+#     distributed under the License is distributed on an "AS IS" BASIS,
+#     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#     See the License for the specific language governing permissions and
+#     limitations under the License.
+
+
 import sys
 import json
 import socket
@@ -70,7 +85,7 @@ class Receiver(object):
 
                 if flag & READ_FLAGS:
                     msg, addr = self.sock.recvfrom(1600)
-                    addr = self.peer_addr
+
                     if addr == self.peer_addr:
                         if msg != 'Hello from sender':
                             # 'Hello from sender' was presumably lost
@@ -79,12 +94,13 @@ class Receiver(object):
                             if ack is not None:
                                 self.sock.sendto(ack, self.peer_addr)
                         return
-   
+
     def run(self):
         self.sock.setblocking(1)  # blocking UDP socket
+
         while True:
             serialized_data, addr = self.sock.recvfrom(1600)
-            addr = self.peer_addr
+
             if addr == self.peer_addr:
                 ack = self.construct_ack_from_data(serialized_data)
                 if ack is not None:
