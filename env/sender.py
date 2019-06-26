@@ -267,8 +267,8 @@ class Sender(object):
                                 os.system("rm "+ fname)
                                 #os.system("mv "+ fname + ' ' +  fname.replace("IN.txt", "D.txt"))
                                 self.send()
-                            l=glob.glob('/home/arramli/aaa/pantheon/data/'+str(self.thid)+'_*X.txt')
-                            if len(l)>0:
+                            ll=glob.glob('/home/arramli/aaa/pantheon/data/'+str(self.thid)+'_*X.txt')
+                            if len(ll)>0:
                                 exit()
 
 
