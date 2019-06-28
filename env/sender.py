@@ -11,7 +11,7 @@
 #     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #     See the License for the specific language governing permissions and
 #     limitations under the License.
-
+import glob
 import os
 import time
 import sys
@@ -261,15 +261,20 @@ class Sender(object):
                 if flag & WRITE_FLAGS:
                     if self.window_is_open():
                         if fname=="":
-                            l=glob.glob('/home/arramli/aaa/pantheon/data/'+str(self.thid)+'_*IN.txt')
+                            l=sorted(glob.glob('/home/arramli/aaa/pantheon/data/'+"{:04d}".format(self.thid)+'_*IN.txt'))
                             if len(l)>0:
                                 fname= l[0]
-                                os.system("rm "+ fname)
-                                #os.system("mv "+ fname + ' ' +  fname.replace("IN.txt", "D.txt"))
+                                #os.system("rm "+ fname)
+                                os.system("mv "+ fname + ' ' +  fname.replace("IN.txt", "D.txt"))
+                                #os.system("touch "+ fname.replace("IN.txt", "S.txt"))
                                 self.send()
-                            l=glob.glob('/home/arramli/aaa/pantheon/data/'+str(self.thid)+'_*X.txt')
-                            if len(l)>0:
-                                exit()
+                            #else:
+                            #    exit()
+                            #ll=sorted(glob.glob('/home/arramli/aaa/pantheon/data/'+"{:04d}".format(self.thid)+'_*X.txt'))
+                            #if len(ll)>0:
+                                #os.system("touch "+ '/home/arramli/aaa/pantheon/data/'+"{:04d}".format(self.thid)+'_X.txt'))
+                                #exit()
+                                #os.system("touch "+ '/home/arramli/aaa/pantheon/data/'+"{:04d}".format(self.thid)+'_EXIT.txt')
 
 
 
