@@ -105,3 +105,4 @@ class Receiver(object):
                 ack = self.construct_ack_from_data(serialized_data)
                 if ack is not None:
                     self.sock.sendto(ack, self.peer_addr)
+                    #exit()
