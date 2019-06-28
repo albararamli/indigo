@@ -17,6 +17,7 @@ import time, subprocess
 from time import sleep
 import glob
 
+arrx = {}
 #mutex=Lock()
 
 #********* CONSTANT VARIABLES *********
@@ -92,16 +93,27 @@ def find_free_port():
 #********* PROXY_THREAD FUNC ***************
 # A thread to handle request from browser
 #*******************************************
-def proxy_thread2(TH_ID,arrx, conn,ooo):
+def proxy_thread2(TH_ID,conn,ooo):
+    global arrx
     print("Yiefe="+str(TH_ID))
     while 1:
-        l=glob.glob('/home/arramli/aaa/pantheon/data/'+str(TH_ID)+'_*D.txt')
+        l=sorted(glob.glob('/home/arramli/aaa/pantheon/data/'+"{:04d}".format(TH_ID)+'_*D.txt'))
         for fname in l:
-            print(fname)
+            '''print(fname)
+            print(fname.split('_')[1])
+            print(arrx)'''
+            if len(arrx)>0:
+                data = arrx[   int(fname.split('_')[1])   ]
+                try:
+                    conn.send(data)
+                except IOError as e:
+                    print("CONNECTION CLOSED")
+            else:
+                data=""
             os.system("rm "+fname)
-            os.system("rm "+  fname.replace("D.txt", "IN.txt"))
-            data = arrx[   int(fname.split('_')[1])   ]
-            conn.send(data)
+            ###os.system("rm "+  fname.replace("D.txt", "IN.txt"))
+            ###print(fname.replace("D.txt", "IN.txt"))
+            
         if ooo[0]==1:
             ooo[0]=2
             os.system("touch "+  fname.replace("D.txt", "X.txt"))
@@ -120,12 +132,13 @@ def proxy_thread(conn, client_addr):
     command_s = "src/wrappers/indigo.py sender " + str(port) + " "+str(TH_ID)#mm-delay 10 
     #os.system(command_s)
     os.system('gnome-terminal -e '+"'"+'sh -c "'+command_s+ ';exec bash"'+"'")
-
+    #print('gnome-terminal -e '+"'"+'sh -c "'+command_s+ ';exec bash"'+"'")
     #subprocess.Popen(command_s, stdout=subprocess.PIPE, shell=True)
     ######################################
     command_r = "src/wrappers/indigo.py receiver " + ip + " " + str(port) #mm-delay 10 
     #os.system(command_r)
     os.system('gnome-terminal -e '+"'"+'sh -c "'+command_r+ ';exec bash"'+"'")
+    #print('gnome-terminal -e '+"'"+'sh -c "'+command_r+ ';exec bash"'+"'")
     #subprocess.Popen(command_r, stdout=subprocess.PIPE, shell=True)
     ######################################
     #mutex.release()
@@ -180,18 +193,16 @@ def proxy_thread(conn, client_addr):
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)  
         s.connect((webserver, port))
         s.send(request)         # send request to webserver
-        arrx = {}
-        thread.start_new_thread(proxy_thread2, (TH_ID, arrx, conn,ooo))
+        thread.start_new_thread(proxy_thread2, (TH_ID,conn,ooo))
 
         while 1:
             # receive data from web server
             data = s.recv(MAX_DATA_RECV)
-            
             if (len(data) > 0):
-                fff=open("data/"+str(TH_ID)+"_"+str(D_ID)+"_IN.txt","w")
+                fff=open("data/"+"{:04d}".format(TH_ID)+"_"+"{:04d}".format(D_ID)+"_IN.txt","w")
                 fff.close()
                 # send to browser
-                ###conn.send(data)
+                # conn.send(data)
                 arrx[D_ID]=data
                 D_ID=D_ID+1
             else:
@@ -215,5 +226,4 @@ def proxy_thread(conn, client_addr):
     
 if __name__ == '__main__':
     main()
-
 
