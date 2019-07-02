@@ -12,7 +12,8 @@
 #     See the License for the specific language governing permissions and
 #     limitations under the License.
 
-
+import os
+import glob
 import sys
 import json
 import socket
@@ -22,8 +23,12 @@ import project_root
 from helpers.helpers import READ_FLAGS, ERR_FLAGS, READ_ERR_FLAGS, ALL_FLAGS
 
 
+
 class Receiver(object):
-    def __init__(self, ip, port):
+
+
+    def __init__(self, ip, port,thid):
+        self.thid = thid
         self.peer_addr = (ip, port)
 
         # UDP socket and poller
@@ -96,13 +101,32 @@ class Receiver(object):
                         return
 
     def run(self):
+
+
         self.sock.setblocking(1)  # blocking UDP socket
 
         while True:
-            serialized_data, addr = self.sock.recvfrom(1600)
+            print("wwwwwwwwwwwwwww[ "+str(self.thid)+" ]wwwwwwwwwwwwwwwwww")
 
-            if addr == self.peer_addr:
-                ack = self.construct_ack_from_data(serialized_data)
-                if ack is not None:
-                    self.sock.sendto(ack, self.peer_addr)
-                    #exit()
+            path_here='/home/arramli/aaa/pantheon/data/'+"{:04d}".format(self.thid)+'_XX.txt'
+            l2=sorted(glob.glob(path_here))
+            print(l2)
+            if len(l2)==1:
+                print("EXIT IT ==> "+path_here)
+                os.system("mv "+ path_here +" " + path_here.replace("XX.txt", "XX2AA.txt"))
+                break
+            else:
+                print("Wait!")
+
+            self.sock.settimeout(20)
+            try:
+                serialized_data, addr = self.sock.recvfrom(1600)
+                print(len(serialized_data))
+                if addr == self.peer_addr:
+                    ack = self.construct_ack_from_data(serialized_data)
+                    if ack is not None:
+                        self.sock.sendto(ack, self.peer_addr)
+                        #exit()
+            except:
+                print("hahahah")
+            print("NEEEEEEXT\n")
