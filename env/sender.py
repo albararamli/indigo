@@ -273,10 +273,15 @@ class Sender(object):
                                 #
                                 self.send()
                             else:
+                                path_here='/home/arramli/aaa/pantheon/data/'+"{:04d}".format(self.thid)+'*_D.txt'
+                                l2x=sorted(glob.glob(path_here))
+
                                 path_here='/home/arramli/aaa/pantheon/data/'+"{:04d}".format(self.thid)+'_X.txt'
                                 l2=sorted(glob.glob(path_here))
-                                if len(l2)==1:
+
+                                if len(l2)==1 and  len(l2x)==0:
                                     print("EXIT IT ==> "+path_here)
+                                    
                                     os.system("mv "+ path_here +" " + path_here.replace("X.txt", "XX.txt"))
                                     #sys.exit('DONE')
                                     go_to_break=1
