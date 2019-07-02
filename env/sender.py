@@ -227,12 +227,15 @@ class Sender(object):
                     self.compute_performance()
 
     def run(self):
+        go_to_break=0
         TIMEOUT = 1000  # ms
 
         self.poller.modify(self.sock, ALL_FLAGS)
         curr_flags = ALL_FLAGS
         fname=""
         while self.running:
+            if go_to_break==1:
+                exit(0) #break #sys.exit('Error occurred to the channel')
             if self.window_is_open():
                 if curr_flags != ALL_FLAGS:
                     self.poller.modify(self.sock, ALL_FLAGS)
@@ -254,7 +257,7 @@ class Sender(object):
                     sys.exit('Error occurred to the channel')
 
                 if flag & READ_FLAGS:
-                    os.system("touch " + fname.replace("IN.txt", "D.txt"))
+                    #os.system("touch " + fname.replace("IN.txt", "D.txt"))
                     fname=""
                     self.recv() 
 
@@ -264,10 +267,19 @@ class Sender(object):
                             l=sorted(glob.glob('/home/arramli/aaa/pantheon/data/'+"{:04d}".format(self.thid)+'_*IN.txt'))
                             if len(l)>0:
                                 fname= l[0]
+                                print(fname)
                                 #os.system("rm "+ fname)
                                 os.system("mv "+ fname + ' ' +  fname.replace("IN.txt", "D.txt"))
-                                #os.system("touch "+ fname.replace("IN.txt", "S.txt"))
+                                #
                                 self.send()
+                            else:
+                                path_here='/home/arramli/aaa/pantheon/data/'+"{:04d}".format(self.thid)+'_X.txt'
+                                l2=sorted(glob.glob(path_here))
+                                if len(l2)==1:
+                                    print("EXIT IT ==> "+path_here)
+                                    os.system("mv "+ path_here +" " + path_here.replace("X.txt", "XX.txt"))
+                                    #sys.exit('DONE')
+                                    go_to_break=1
                             #else:
                             #    exit()
                             #ll=sorted(glob.glob('/home/arramli/aaa/pantheon/data/'+"{:04d}".format(self.thid)+'_*X.txt'))
@@ -275,7 +287,6 @@ class Sender(object):
                                 #os.system("touch "+ '/home/arramli/aaa/pantheon/data/'+"{:04d}".format(self.thid)+'_X.txt'))
                                 #exit()
                                 #os.system("touch "+ '/home/arramli/aaa/pantheon/data/'+"{:04d}".format(self.thid)+'_EXIT.txt')
-
 
 
 
