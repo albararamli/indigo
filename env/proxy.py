@@ -97,26 +97,38 @@ def proxy_thread2(TH_ID,conn,ooo):
     global arrx
     print("Yiefe="+str(TH_ID))
     while 1:
-        l=sorted(glob.glob('/home/arramli/aaa/pantheon/data/'+"{:04d}".format(TH_ID)+'_*D.txt'))
+        path_here='/home/arramli/aaa/pantheon/data/'+"{:04d}".format(TH_ID)+'_*D.txt'
+        l=sorted(glob.glob(path_here))
+        if len(l) ==0:
+            #print("NO FILES => "+path_here)
+            path_here='/home/arramli/aaa/pantheon/data/'+"{:04d}".format(TH_ID)+'_X.txt'
+            l2=sorted(glob.glob(path_here))
+            if len(l2)==1:
+                ###os.system("rm "+path_here)
+                ###os.system("rm "+  path_here.replace("D.txt", "IN.txt"))
+                #print("EXIT => "+l2[0].replace("X.txt", "XX.txt"))
+                break
         for fname in l:
             '''print(fname)
             print(fname.split('_')[1])
             print(arrx)'''
             if len(arrx)>0:
-                data = arrx[   int(fname.split('_')[1])   ]
+                data = arrx[   TH_ID,int(fname.split('_')[1])   ]
                 try:
                     conn.send(data)
                 except IOError as e:
-                    print("CONNECTION CLOSED")
+                    print("NOT SENT: "+fname)
             else:
                 data=""
+                print("EMPTY: "+fname)
             os.system("rm "+fname)
             ###os.system("rm "+  fname.replace("D.txt", "IN.txt"))
             ###print(fname.replace("D.txt", "IN.txt"))
             
-        if ooo[0]==1:
-            ooo[0]=2
-            os.system("touch "+  fname.replace("D.txt", "X.txt"))
+            '''if ooo[0]==1:
+                print("XXXXXXXXXXXXXXXXXXX")
+                ooo[0]=2
+                os.system("touch "+  fname.replace("D.txt", "X.txt"))'''
 
 def proxy_thread(conn, client_addr):
     #mutex.acquire()
@@ -131,13 +143,13 @@ def proxy_thread(conn, client_addr):
     ######################################
     command_s = "src/wrappers/indigo.py sender " + str(port) + " "+str(TH_ID)#mm-delay 10 
     #os.system(command_s)
-    os.system('gnome-terminal -e '+"'"+'sh -c "'+command_s+ ';exec bash"'+"'")
+    os.system('gnome-terminal -e '+"'"+'sh -c "'+command_s+ ';exit;exec bash"'+"'")
     #print('gnome-terminal -e '+"'"+'sh -c "'+command_s+ ';exec bash"'+"'")
     #subprocess.Popen(command_s, stdout=subprocess.PIPE, shell=True)
     ######################################
-    command_r = "src/wrappers/indigo.py receiver " + ip + " " + str(port) #mm-delay 10 
+    command_r = "src/wrappers/indigo.py receiver " + ip + " " + str(port) + " "+str(TH_ID) #mm-delay 10 
     #os.system(command_r)
-    os.system('gnome-terminal -e '+"'"+'sh -c "'+command_r+ ';exec bash"'+"'")
+    os.system('gnome-terminal -e '+"'"+'sh -c "'+command_r+ ';exit;exec bash"'+"'")
     #print('gnome-terminal -e '+"'"+'sh -c "'+command_r+ ';exec bash"'+"'")
     #subprocess.Popen(command_r, stdout=subprocess.PIPE, shell=True)
     ######################################
@@ -194,22 +206,36 @@ def proxy_thread(conn, client_addr):
         s.connect((webserver, port))
         s.send(request)         # send request to webserver
         thread.start_new_thread(proxy_thread2, (TH_ID,conn,ooo))
+        close_or_not=0
 
         while 1:
+            print("TH_ID="+str(TH_ID)+"\nD_ID="+str(D_ID))
             # receive data from web server
             data = s.recv(MAX_DATA_RECV)
             if (len(data) > 0):
-                fff=open("data/"+"{:04d}".format(TH_ID)+"_"+"{:04d}".format(D_ID)+"_IN.txt","w")
+                path_here="data/"+"{:04d}".format(TH_ID)+"_"+"{:04d}".format(D_ID)+"_IN.txt"
+                fff=open(path_here,"w")
                 fff.close()
                 # send to browser
-                # conn.send(data)
-                arrx[D_ID]=data
+                #conn.send(data)
+                arrx[TH_ID,D_ID]=data
+                #print(arrx[TH_ID,D_ID])
                 D_ID=D_ID+1
+                close_or_not=0
             else:
-                if ooo[0]=="2":
+                close_or_not=close_or_not+1
+                print("BREAK ["+str(close_or_not)+"] "+path_here)
+                if close_or_not>=1:
+                    path_here="data/"+"{:04d}".format(TH_ID)+"_X.txt"
+                    fff=open(path_here,"w")
+                    fff.close()
+                    break
+                '''if ooo[0]=="2":
+                    print("BREAK[2]: "+path_here)
                     break
                 else:
                     ooo[0]="1"
+                    print("BREAK[1]: "+path_here)'''
                    
 
         s.close()
