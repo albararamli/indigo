@@ -23,9 +23,10 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('ip', metavar='IP')
     parser.add_argument('port', type=int)
+    parser.add_argument('thid', type=int)
     args = parser.parse_args()
 
-    receiver = Receiver(args.ip, args.port)
+    receiver = Receiver(args.ip, args.port,args.thid)
 
     try:
         receiver.handshake()
