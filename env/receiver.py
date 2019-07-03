@@ -108,7 +108,7 @@ class Receiver(object):
         while True:
             print("wwwwwwwwwwwwwww[ "+str(self.thid)+" ]wwwwwwwwwwwwwwwwww")
 
-            path_here='/home/arramli/aaa/pantheon/data/'+"{:04d}".format(self.thid)+'_XX.txt'
+            path_here='data/'+"{:04d}".format(self.thid)+'_XX.txt'
             l2=sorted(glob.glob(path_here))
             print(l2)
             if len(l2)==1:
