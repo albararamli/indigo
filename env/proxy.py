@@ -100,41 +100,46 @@ def proxy_thread2(TH_ID,conn,ooo):
         print("NOT SENT: "+fname)'''
 
     global arrx
-    print("Yiefe=["+str(TH_ID)+"]\n")
+    ##print("Yiefe=["+str(TH_ID)+"]\n")
     while 1:
-        path_here='/home/arramli/aaa/pantheon/data/'+"{:04d}".format(TH_ID)+'_*D.txt'
+        path_here='data/'+"{:04d}".format(TH_ID)+'_*D.txt'
         l=sorted(glob.glob(path_here))
         #print(path_here+"\n D-File["+str(TH_ID)+"]="+str(len(l))+"=")
         #print(l)
         if len(l) ==0:
             #print("NO FILES => "+path_here)
-            path_here='/home/arramli/aaa/pantheon/data/'+"{:04d}".format(TH_ID)+'_XX.txt'
+            path_here='data/'+"{:04d}".format(TH_ID)+'_XX.txt'
             l2=sorted(glob.glob(path_here))
-            if len(l2)==1:
+
+            path_here='data/'+"{:04d}".format(TH_ID)+'_*IN.txt'
+            l2x=sorted(glob.glob(path_here))
+
+            if len(l2)==1 and len(l2x)==0:
                 ###os.system("rm "+path_here)
                 ###os.system("rm "+  path_here.replace("D.txt", "IN.txt"))
                 #print("EXIT => "+l2[0].replace("X.txt", "XX.txt"))
+                print("==================== DONE TH_ID="+str(TH_ID)+" ====================\n")
                 break
         #print(arrx)
         for fname in l:
-            print("\n@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@")
+            '''print("\n@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@")
             print(fname)
            
             print("@@@@@@@@@@"+fname.split('_')[1])
             datax = arrx[   TH_ID,int(fname.split('_')[1])   ]
             print(datax)
             conn.send(datax)
-            print("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@\n")
+            print("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@\n")'''
             if len(arrx)>0:
-                #data = arrx[   TH_ID,int(fname.split('_')[1])   ]
-                '''try:
+                data = arrx[   TH_ID,int(fname.split('_')[1])   ]
+                try:
                     conn.send(data)
-               
+                    print("[O] SENT: "+fname)
                 except IOError as e:
-                    print("NOT SENT: "+fname)'''
+                    print("[X] NOT SENT: "+fname)
             else:
                 data=""
-                print("EMPTY: "+fname)
+                print("[?] EMPTY: "+fname)
             os.system("rm "+fname)
             ###os.system("rm "+  fname.replace("D.txt", "IN.txt"))
             ###print(fname.replace("D.txt", "IN.txt"))
@@ -221,9 +226,9 @@ def proxy_thread(conn, client_addr):
         s.send(request)         # send request to webserver
         thread.start_new_thread(proxy_thread2, (TH_ID,conn,ooo))
         close_or_not=0
-
+        print("================= TH_ID="+str(TH_ID)+ "====================")
         while 1:
-            print("TH_ID="+str(TH_ID)+"\nD_ID="+str(D_ID))
+            print("[C] COLLECT DATA [TH_ID="+str(TH_ID)+" D_ID="+str(D_ID)+"]")
             # receive data from web server
             data = s.recv(MAX_DATA_RECV)
             if (len(data) > 0):
@@ -238,11 +243,11 @@ def proxy_thread(conn, client_addr):
                 close_or_not=0
             else:
                 close_or_not=close_or_not+1
-                print("BREAK ["+str(close_or_not)+"] "+path_here)
                 if close_or_not>=1:
                     path_here="data/"+"{:04d}".format(TH_ID)+"_X.txt"
                     fff=open(path_here,"w")
                     fff.close()
+                    print("[F] FINISH COLLECTING DATA [TH_ID="+str(TH_ID)+" D_ID="+str(D_ID)+"] till "+path_here+"\n")
                     break
                 '''if ooo[0]=="2":
                     print("BREAK[2]: "+path_here)
