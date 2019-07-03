@@ -264,7 +264,7 @@ class Sender(object):
                 if flag & WRITE_FLAGS:
                     if self.window_is_open():
                         if fname=="":
-                            l=sorted(glob.glob('/home/arramli/aaa/pantheon/data/'+"{:04d}".format(self.thid)+'_*IN.txt'))
+                            l=sorted(glob.glob('data/'+"{:04d}".format(self.thid)+'_*IN.txt'))
                             if len(l)>0:
                                 fname= l[0]
                                 print(fname)
@@ -273,10 +273,10 @@ class Sender(object):
                                 #
                                 self.send()
                             else:
-                                path_here='/home/arramli/aaa/pantheon/data/'+"{:04d}".format(self.thid)+'*_D.txt'
+                                path_here='data/'+"{:04d}".format(self.thid)+'*_D.txt'
                                 l2x=sorted(glob.glob(path_here))
 
-                                path_here='/home/arramli/aaa/pantheon/data/'+"{:04d}".format(self.thid)+'_X.txt'
+                                path_here='data/'+"{:04d}".format(self.thid)+'_X.txt'
                                 l2=sorted(glob.glob(path_here))
 
                                 if len(l2)==1 and  len(l2x)==0:
@@ -287,11 +287,11 @@ class Sender(object):
                                     go_to_break=1
                             #else:
                             #    exit()
-                            #ll=sorted(glob.glob('/home/arramli/aaa/pantheon/data/'+"{:04d}".format(self.thid)+'_*X.txt'))
+                            #ll=sorted(glob.glob('data/'+"{:04d}".format(self.thid)+'_*X.txt'))
                             #if len(ll)>0:
-                                #os.system("touch "+ '/home/arramli/aaa/pantheon/data/'+"{:04d}".format(self.thid)+'_X.txt'))
+                                #os.system("touch "+ 'data/'+"{:04d}".format(self.thid)+'_X.txt'))
                                 #exit()
-                                #os.system("touch "+ '/home/arramli/aaa/pantheon/data/'+"{:04d}".format(self.thid)+'_EXIT.txt')
+                                #os.system("touch "+ 'data/'+"{:04d}".format(self.thid)+'_EXIT.txt')
 
 
 
