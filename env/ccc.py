@@ -13,7 +13,7 @@ import socket
 TCP_IP = str(sys.argv[1]) #'127.0.0.1'
 TCP_PORT = int(sys.argv[2]) #5005
 TCP_TH_ID = int(sys.argv[3]) #0
-BUFFER_SIZE = 1024
+BUFFER_SIZE = 1500
 MESSAGE = "Hello, World!"
 
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
