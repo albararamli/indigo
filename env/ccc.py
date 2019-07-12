@@ -13,14 +13,14 @@ import socket
 TCP_IP = str(sys.argv[1]) #'127.0.0.1'
 TCP_PORT = int(sys.argv[2]) #5005
 TCP_TH_ID = int(sys.argv[3]) #0
-BUFFER_SIZE = 1500
-MESSAGE = "Hello, World!"
+BUFFER_SIZE = 1024
+MESSAGE = 'x' * 1400
 
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 s.connect((TCP_IP, TCP_PORT))
 
 ########################################
-import subprocess
+#import subprocess
 ########################################
 while True:
 	fname=""
@@ -41,7 +41,7 @@ while True:
 			s.send(MESSAGE)
 			s.settimeout(20)
 			data = s.recv(BUFFER_SIZE)
-			print "sent/received data:", data
+			#print "sent/received data:", data
 		else:
 			path_here='data/'+"{:04d}".format(TCP_TH_ID)+'*_D.txt'
 			l2x=sorted(glob.glob(path_here))
