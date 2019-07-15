@@ -6,7 +6,8 @@
 #                                                   *
 #****************************************************
 
-
+#CC="LINUX-CC" ## to use OS CC like cubic
+CC="INDIGO" ## to use indigo CC
 import os,sys,thread,socket
 from sender import Sender
 #from dagger.run_sender import get_sender
@@ -116,7 +117,10 @@ def proxy_thread2(TH_ID,conn,ooo):
             path_here='data/'+"{:04d}".format(TH_ID)+'_*IN.txt'
             l2x=sorted(glob.glob(path_here))
 
-            if len(l2)==1 and len(l2x)==0:
+            path_here='data/'+"{:04d}".format(TH_ID)+'_*D.txt'
+            l2xx=sorted(glob.glob(path_here))
+
+            if len(l2)==1 and len(l2x)==0  and len(l2xx)==0:
                 ###os.system("rm "+path_here)
                 ###os.system("rm "+  path_here.replace("D.txt", "IN.txt"))
                 #print("EXIT => "+l2[0].replace("X.txt", "XX.txt"))
@@ -152,6 +156,7 @@ def proxy_thread2(TH_ID,conn,ooo):
                 os.system("touch "+  fname.replace("D.txt", "X.txt"))'''
 
 def proxy_thread(conn, client_addr):
+    global CC
     #mutex.acquire()
     global TH_ID_G
     TH_ID=TH_ID_G
@@ -172,15 +177,18 @@ def proxy_thread(conn, client_addr):
     print(ports)
     print("=====>"+str(port))
     ######################################
-    command_s = "src/wrappers/indigo.py sender " + str(port) + " "+str(TH_ID)#mm-delay 10 
-    command_s = "python third_party/indigo/env/sss.py " + ip + " " + str(port) + " "+str(TH_ID)#mm-delay 10 
+
+    if CC =="LINUX-CC":
+        command_s = "python third_party/indigo/env/sss.py " + ip + " " + str(port) + " "+str(TH_ID)#mm-delay 10 
+        command_r = "python third_party/indigo/env/ccc.py " + ip + " " + str(port) + " "+str(TH_ID)#mm-delay 10 
+    else:
+        command_s = "src/wrappers/indigo.py sender " + str(port) + " "+str(TH_ID)#mm-delay 10 
+        command_r = "src/wrappers/indigo.py receiver " + ip + " " + str(port) + " "+str(TH_ID) #mm-delay 10 
     #os.system(command_s)
     os.system('gnome-terminal -e '+"'"+'sh -c "'+command_s+ ';exit;exec bash"'+"'")
     #print('gnome-terminal -e '+"'"+'sh -c "'+command_s+ ';exec bash"'+"'")
     #subprocess.Popen(command_s, stdout=subprocess.PIPE, shell=True)
     ######################################
-    command_r = "src/wrappers/indigo.py receiver " + ip + " " + str(port) + " "+str(TH_ID) #mm-delay 10 
-    command_r = "python third_party/indigo/env/ccc.py " + ip + " " + str(port) + " "+str(TH_ID)#mm-delay 10 
     #os.system(command_r)
     os.system('gnome-terminal -e '+"'"+'sh -c "'+command_r+ ';exit;exec bash"'+"'")
     #print('gnome-terminal -e '+"'"+'sh -c "'+command_r+ ';exec bash"'+"'")
@@ -188,24 +196,34 @@ def proxy_thread(conn, client_addr):
     ######################################
     #mutex.release()
     D_ID=0
-
     # get the request from browser
     request = conn.recv(MAX_DATA_RECV)
 
     # parse the first line
     first_line = request.split('\n')[0]
-
     # get url
-    try:
-        url = first_line.split(' ')[1]
-    except:
-        print("?????????")
-	path_herexx='data/'+"{:04d}".format(TH_ID)+'_X.txt'
-	os.system("touch "+ path_herexx)
-	path_herexx='data/'+"{:04d}".format(TH_ID)+'_XX.txt'
-	os.system("touch "+ path_herexx)
-        sys.exit(1)
 
+    url = first_line.split(' ')[1]
+    '''while True:
+        try:
+            # get the request from browser
+            request = conn.recv(MAX_DATA_RECV)
+
+            # parse the first line
+            first_line = request.split('\n')[0]
+            # get url
+
+            url = first_line.split(' ')[1]
+            break
+        except:
+            #print("?????????")
+            #path_herexx='data/'+"{:04d}".format(TH_ID)+'_X.txt'
+            #os.system("touch "+ path_herexx)
+            #path_herexx='data/'+"{:04d}".format(TH_ID)+'_XX.txt'
+            #os.system("touch "+ path_herexx)
+            #sys.exit(1)
+            pass
+    '''
     for i in range(0,len(BLOCKED)):
         if BLOCKED[i] in url:
             printout("Blacklisted",first_line,client_addr)
@@ -287,6 +305,11 @@ def proxy_thread(conn, client_addr):
             s.close()
         if conn:
             conn.close()
+	print("********************************************")
+	path_here="data/"+"{:04d}".format(TH_ID)+"_X.txt"
+	fff=open(path_here,"w")
+	fff.close()
+
         printout("Peer Reset",first_line,client_addr)
         sys.exit(1)
 #********** END PROXY_THREAD ***********
