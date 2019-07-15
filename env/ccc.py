@@ -13,10 +13,11 @@ import socket
 TCP_IP = str(sys.argv[1]) #'127.0.0.1'
 TCP_PORT = int(sys.argv[2]) #5005
 TCP_TH_ID = int(sys.argv[3]) #0
-BUFFER_SIZE = 1024
+BUFFER_SIZE = 1500
 MESSAGE = 'x' * 1400
 
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 s.connect((TCP_IP, TCP_PORT))
 
 ########################################
@@ -39,26 +40,32 @@ while True:
 			#
 			#self.send()
 			s.send(MESSAGE)
-			s.settimeout(20)
+			###s.settimeout(20)
+			print("Wait server to confirm the req")
 			data = s.recv(BUFFER_SIZE)
-			#print "sent/received data:", data
+			if data:
+				print "sent/received data:", " GOOD" #data
+			else:
+				print("LOST")
 		else:
-			path_here='data/'+"{:04d}".format(TCP_TH_ID)+'*_D.txt'
-			l2x=sorted(glob.glob(path_here))
+			path_here='data/'+"{:04d}".format(TCP_TH_ID)+'*_IN.txt'
+			l2xx=sorted(glob.glob(path_here))
+
+			#path_here='data/'+"{:04d}".format(TCP_TH_ID)+'*_D.txt'
+			#l2x=sorted(glob.glob(path_here))
 
 			path_here='data/'+"{:04d}".format(TCP_TH_ID)+'_X.txt'
 			l2=sorted(glob.glob(path_here))
 
-		if len(l2)==1 and  len(l2x)==0:
-			print("EXIT IT ==> "+path_here)
-		    
-			os.system("mv "+ path_here +" " + path_here.replace("X.txt", "XX.txt"))
-			#sys.exit('DONE')
-			go_to_break=1
-			break
+			if len(l2)==1 and len(l2xx)==0: #len(l2x)==0 and
+				print("EXIT IT ==> "+path_here)
+				os.system("mv "+ path_here +" " + path_here.replace("X.txt", "XX.txt"))
+				#sys.exit('DONE')
+				go_to_break=1
+				break
 ########################################
 ########################################
 s.close()
 
-import os
-os.system('read -p "Press [Enter] to continue...')
+#import os
+#os.system('read -p "Press [Enter] to continue...')
