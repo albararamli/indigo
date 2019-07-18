@@ -36,7 +36,7 @@ while 1:
 	#else:
 	#	print("Wait!")
 ###############
-	#s.settimeout(20)
+	conn.settimeout(3)
 	#try:
 	print("Wait sender to send a req")
 	data = conn.recv(BUFFER_SIZE)
@@ -46,6 +46,11 @@ while 1:
 		conn.send(data)  # echo
 	else:
 		print("LOST")
+
+		path_here='data/'+'DONE.txt'
+		l=sorted(glob.glob(path_here))
+		if(len(l)>0):
+		     os._exit(1) #sys.exit(1)
 	#except:
 		#print("NO NO NO")
 conn.close()
