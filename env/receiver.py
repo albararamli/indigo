@@ -117,8 +117,13 @@ class Receiver(object):
                 break
             else:
                 print("Wait!")
-
-            self.sock.settimeout(20)
+		##################################
+		path_here='data/'+'DONE.txt'
+		lll=sorted(glob.glob(path_here))
+		if(len(lll)>0):
+		     os._exit(1) #sys.exit(1)
+		##################################
+            self.sock.settimeout(3)
             try:
                 serialized_data, addr = self.sock.recvfrom(1600)
                 print(len(serialized_data))
