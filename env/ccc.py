@@ -40,9 +40,10 @@ while True:
 			#
 			#self.send()
 			s.send(MESSAGE)
-			###s.settimeout(20)
+			s.settimeout(3)
 			print("Wait server to confirm the req")
 			data = s.recv(BUFFER_SIZE)
+			print("---")
 			if data:
 				print "sent/received data:", " GOOD" #data
 			else:
@@ -63,6 +64,10 @@ while True:
 				#sys.exit('DONE')
 				go_to_break=1
 				break
+			path_here='data/'+'DONE.txt'
+			lll=sorted(glob.glob(path_here))
+			if(len(lll)>0):
+			     os._exit(1) #sys.exit(1)
 ########################################
 ########################################
 s.close()
