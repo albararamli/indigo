@@ -285,6 +285,13 @@ class Sender(object):
                                     os.system("mv "+ path_here +" " + path_here.replace("X.txt", "XX.txt"))
                                     #sys.exit('DONE')
                                     go_to_break=1
+
+				##################################
+				path_here='data/'+'DONE.txt'
+				lll=sorted(glob.glob(path_here))
+				if(len(lll)>0):
+				     os._exit(1) #sys.exit(1)
+				##################################
                             #else:
                             #    exit()
                             #ll=sorted(glob.glob('data/'+"{:04d}".format(self.thid)+'_*X.txt'))
