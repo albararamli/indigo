@@ -6,7 +6,7 @@
 #                                                   *
 #****************************************************
 
-#CC="LINUX-CC" ## to use OS CC like cubic
+#CC="LINUX" ## to use OS CC like cubic
 CC="INDIGO" ## to use indigo CC
 import os,sys,thread,socket
 from sender import Sender
@@ -22,7 +22,7 @@ arrx = {}
 #mutex=Lock()
 
 #********* CONSTANT VARIABLES *********
-BACKLOG = 50            # how many pending connections queue will hold
+BACKLOG = 30            # how many pending connections queue will hold
 MAX_DATA_RECV = 1500  # max number of bytes we receive at once
 DEBUG = True            # set to True to see the debug msgs
 BLOCKED = []            # just an example. Remove with [""] for no blocking at all.
@@ -32,18 +32,21 @@ ports=[]
 #********* MAIN PROGRAM ***************
 #**************************************
 def main():
-    os.system("rm -fR data/*")
+    global CC
     # check the length of command running
-    if (len(sys.argv)<2):
+    if (len(sys.argv)<2+1):
         print "No port given, using :8080 (http-alt)" 
         port = 8080
     else:
         port = int(sys.argv[1]) # port from argument
+	CC=sys.argv[2] #CC="LINUX-CC" ## to use OS CC like cubic, CC="INDIGO" ## to use indigo CC
+    os.system("rm -fR data/*")
+    thread.start_new_thread(proxy_thread0,())
 
     # host and port info.
     host = ''               # blank for localhost
     
-    print "Proxy Server Running on ",host,":",port
+    print "Proxy Server Running on ",host,":",port, "CC=",CC
 
     try:
         # create a socket
@@ -64,9 +67,10 @@ def main():
     # get the connection from client
     while 1:
         conn, client_addr = s.accept()
-
-        # create a thread to handle request
-        thread.start_new_thread(proxy_thread, (conn, client_addr))
+	print(client_addr[0])
+	if client_addr[0] != "GET http://api.rtbmediatracker.com/api/settingslist?data-wid=5093":
+            # create a thread to handle request
+            thread.start_new_thread(proxy_thread, (conn, client_addr))
         
     s.close()
 #************** END MAIN PROGRAM ***************
@@ -85,8 +89,8 @@ def find_free_port():
     #mutex.acquire()
     port = 0
     with closing(socket.socket(socket.AF_INET, socket.SOCK_STREAM)) as s:
-        s.bind(('', 0))
         s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        s.bind(('', 0))
         port = s.getsockname()[1]
     #mutex.release()
 
@@ -96,6 +100,17 @@ def find_free_port():
 #********* PROXY_THREAD FUNC ***************
 # A thread to handle request from browser
 #*******************************************
+def proxy_thread0():
+    while True:
+        print("yyy")
+
+        path_here='data/'+'DONE.txt'
+        l=sorted(glob.glob(path_here))
+        if(len(l)>0):
+             os._exit(1) #sys.exit(1)
+        time.sleep(1)
+
+	
 def proxy_thread2(TH_ID,conn,ooo):
     '''try:
         conn.send(data)
@@ -178,7 +193,7 @@ def proxy_thread(conn, client_addr):
     print("=====>"+str(port))
     ######################################
 
-    if CC =="LINUX-CC":
+    if CC =="LINUX":
         command_s = "python third_party/indigo/env/sss.py " + ip + " " + str(port) + " "+str(TH_ID)#mm-delay 10 
         command_r = "python third_party/indigo/env/ccc.py " + ip + " " + str(port) + " "+str(TH_ID)#mm-delay 10 
     else:
@@ -262,6 +277,7 @@ def proxy_thread(conn, client_addr):
     try:
         # create a socket to connect to the web server
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)  
+        s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         s.connect((webserver, port))
         s.send(request)         # send request to webserver
         thread.start_new_thread(proxy_thread2, (TH_ID,conn,ooo))
@@ -306,11 +322,14 @@ def proxy_thread(conn, client_addr):
         if conn:
             conn.close()
 	print("********************************************")
+	print(first_line[0])
+	print("********************************************")
 	path_here="data/"+"{:04d}".format(TH_ID)+"_X.txt"
 	fff=open(path_here,"w")
 	fff.close()
 
         printout("Peer Reset",first_line,client_addr)
+	print("********************************************")
         sys.exit(1)
 #********** END PROXY_THREAD ***********
     
