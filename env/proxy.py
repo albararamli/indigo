@@ -67,10 +67,8 @@ def main():
     # get the connection from client
     while 1:
         conn, client_addr = s.accept()
-	print(client_addr[0])
-	if client_addr[0] != "GET http://api.rtbmediatracker.com/api/settingslist?data-wid=5093":
-            # create a thread to handle request
-            thread.start_new_thread(proxy_thread, (conn, client_addr))
+        # create a thread to handle request
+        thread.start_new_thread(proxy_thread, (conn, client_addr))
         
     s.close()
 #************** END MAIN PROGRAM ***************
@@ -192,12 +190,12 @@ def proxy_thread(conn, client_addr):
     print(ports)
     print("=====>"+str(port))
     ######################################
-
-    if CC =="LINUX":
-        command_s = "python third_party/indigo/env/sss.py " + ip + " " + str(port) + " "+str(TH_ID)#mm-delay 10 
-        command_r = "python third_party/indigo/env/ccc.py " + ip + " " + str(port) + " "+str(TH_ID)#mm-delay 10 
+    mahimahi="mm-delay 10 "
+    if CC =="INDIGO":
+        command_s = mahimahi+"python third_party/indigo/env/sss.py " + ip + " " + str(port) + " "+str(TH_ID)#mm-delay 10 
+        command_r = mahimahi+"python third_party/indigo/env/ccc.py " + ip + " " + str(port) + " "+str(TH_ID)#mm-delay 10 
     else:
-        command_s = "src/wrappers/indigo.py sender " + str(port) + " "+str(TH_ID)#mm-delay 10 
+        command_s = mahimahi+"src/wrappers/indigo.py sender " + str(port) + " "+str(TH_ID)#mm-delay 10 
         command_r = "src/wrappers/indigo.py receiver " + ip + " " + str(port) + " "+str(TH_ID) #mm-delay 10 
     #os.system(command_s)
     os.system('gnome-terminal -e '+"'"+'sh -c "'+command_s+ ';exit;exec bash"'+"'")
@@ -219,6 +217,12 @@ def proxy_thread(conn, client_addr):
     # get url
 
     url = first_line.split(' ')[1]
+    if url == "http://api.rtbmediatracker.com/api/settingslist?data-wid=5093":
+        print("##########################################")
+        print("##########################################")
+        print(url)
+        print("##########################################")
+        print("##########################################")
     '''while True:
         try:
             # get the request from browser
@@ -319,8 +323,8 @@ def proxy_thread(conn, client_addr):
     except socket.error, (value, message):
         if s:
             s.close()
-        if conn:
-            conn.close()
+        #if conn:
+        #    conn.close()
 	print("********************************************")
 	print(first_line[0])
 	print("********************************************")
