@@ -190,8 +190,8 @@ def proxy_thread(conn, client_addr):
     print(ports)
     print("=====>"+str(port))
     ######################################
-    mahimahi="mm-delay 10 "
-    if CC =="INDIGO":
+    mahimahi=""#"mm-delay 10 "
+    if CC =="LINUX":
         command_s = mahimahi+"python third_party/indigo/env/sss.py " + ip + " " + str(port) + " "+str(TH_ID)#mm-delay 10 
         command_r = mahimahi+"python third_party/indigo/env/ccc.py " + ip + " " + str(port) + " "+str(TH_ID)#mm-delay 10 
     else:
