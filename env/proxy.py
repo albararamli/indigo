@@ -152,6 +152,13 @@ def proxy_thread2(TH_ID,conn,ooo):
             if len(arrx)>0:
                 data = arrx[   TH_ID,int(fname.split('_')[1])   ]
                 try:
+                    ############# DELAY ##############
+                    ############# DELAY ##############
+                    ############# DELAY ##############
+                    #time.sleep(0.1) # 0.05 =50ms
+                    ############# DELAY ##############
+                    ############# DELAY ##############
+                    ############# DELAY ##############
                     conn.send(data)
                     print("[O] SENT: "+fname)
                 except IOError as e:
@@ -190,9 +197,9 @@ def proxy_thread(conn, client_addr):
     print(ports)
     print("=====>"+str(port))
     ######################################
-    mahimahi=""#"mm-delay 10 "
+    mahimahi=""#"mm-delay 300 "
     if CC =="LINUX":
-        command_s = mahimahi+"python third_party/indigo/env/sss.py " + ip + " " + str(port) + " "+str(TH_ID)#mm-delay 10 
+        command_s = "python third_party/indigo/env/sss.py " + ip + " " + str(port) + " "+str(TH_ID)#mm-delay 10 
         command_r = mahimahi+"python third_party/indigo/env/ccc.py " + ip + " " + str(port) + " "+str(TH_ID)#mm-delay 10 
     else:
         command_s = mahimahi+"src/wrappers/indigo.py sender " + str(port) + " "+str(TH_ID)#mm-delay 10 
@@ -308,6 +315,8 @@ def proxy_thread(conn, client_addr):
                     fff=open(path_here,"w")
                     fff.close()
                     print("[F] FINISH COLLECTING DATA [TH_ID="+str(TH_ID)+" D_ID="+str(D_ID)+"] till "+path_here+"\n")
+                    
+
                     break
                 '''if ooo[0]=="2":
                     print("BREAK[2]: "+path_here)
@@ -323,8 +332,8 @@ def proxy_thread(conn, client_addr):
     except socket.error, (value, message):
         if s:
             s.close()
-        #if conn:
-        #    conn.close()
+        if conn:
+            conn.close()
 	print("********************************************")
 	print(first_line[0])
 	print("********************************************")

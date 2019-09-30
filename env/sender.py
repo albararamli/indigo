@@ -39,6 +39,7 @@ def format_actions(action_list):
 
 
 class Sender(object):
+    line_algo="xxx"
     # RL exposed class/static variables
     max_steps = 1000
     state_dim = 4
@@ -69,6 +70,8 @@ class Sender(object):
         self.next_ack = 0
         self.cwnd = 10.0
         self.step_len_ms = 10
+        
+        
 
         # state variables for RLCC
         self.delivered_time = 0
@@ -95,7 +98,19 @@ class Sender(object):
         self.sock.close()
 
     def handshake(self):
+        global line_algo
         """Handshake with peer receiver. Must be called before run()."""
+
+        ##############################
+        ##############################
+        f = open("logx/now.txt", 'r')
+        line_algo = f.readline()
+        if not line_algo:
+            line_algo="none"
+        f.close()
+        line_algo=line_algo.strip()
+        ##############################
+        ############################## 
 
         while True:
             msg, addr = self.sock.recvfrom(1600)
@@ -175,6 +190,7 @@ class Sender(object):
         data.payload = self.dummy_payload
 
         serialized_data = data.SerializeToString()
+
         self.sock.sendto(serialized_data, self.peer_addr)
 
         self.seq_num += 1
@@ -206,7 +222,7 @@ class Sender(object):
                 start_sample = time.time()
 
             action = self.sample_action(state)
-
+            os.system("echo "+"{:04d}".format(self.thid)+ '\t' +str(time.time()) + '\t'+str(self.delay_ewma)+'\t'+str(self.delivery_rate_ewma)+'\t'+str(self.send_rate_ewma)+'\t'+str(self.cwnd) +">> logx/"+line_algo+"-state.txt") 
             if self.debug:
                 self.sampling_file.write('%.2f ms\n' % ((time.time() - start_sample) * 1000))
 
@@ -269,9 +285,10 @@ class Sender(object):
                                 fname= l[0]
                                 print(fname)
                                 #os.system("rm "+ fname)
-                                os.system("mv "+ fname + ' ' +  fname.replace("IN.txt", "D.txt"))
                                 #
                                 self.send()
+                                os.system("mv "+ fname + ' ' +  fname.replace("IN.txt", "D.txt"))
+                                os.system("echo "+"{:04d}".format(self.thid)+ '\t' +str(time.time()) +'\t'+str(self.cwnd) +">> logx/"+line_algo+".txt") 
                             else:
                                 path_here='data/'+"{:04d}".format(self.thid)+'*_D.txt'
                                 l2x=sorted(glob.glob(path_here))
@@ -281,7 +298,13 @@ class Sender(object):
 
                                 if len(l2)==1 and  len(l2x)==0:
                                     print("EXIT IT ==> "+path_here)
-                                    
+                                    ############# DELAY ##############
+                                    ############# DELAY ##############
+                                    ############# DELAY ##############
+                                    ###time.sleep(0.050) # 0.050 =50ms
+                                    ############# DELAY ##############
+                                    ############# DELAY ##############
+                                    ############# DELAY ##############
                                     os.system("mv "+ path_here +" " + path_here.replace("X.txt", "XX.txt"))
                                     #sys.exit('DONE')
                                     go_to_break=1
