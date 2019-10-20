@@ -12,6 +12,7 @@
 #     See the License for the specific language governing permissions and
 #     limitations under the License.
 
+import time
 import os
 import glob
 import sys
@@ -130,6 +131,13 @@ class Receiver(object):
                 if addr == self.peer_addr:
                     ack = self.construct_ack_from_data(serialized_data)
                     if ack is not None:
+                        ############# DELAY ##############
+                        ############# DELAY ##############
+                        ############# DELAY ##############
+                        #time.sleep(0.003) # 0.050 =50ms
+                        ############# DELAY ##############
+                        ############# DELAY ##############
+                        ############# DELAY ##############
                         self.sock.sendto(ack, self.peer_addr)
                         print("n="+str(nnxnn))
                         nnxnn=nnxnn+1
