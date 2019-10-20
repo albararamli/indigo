@@ -11,6 +11,7 @@
 #     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #     See the License for the specific language governing permissions and
 #     limitations under the License.
+import subprocess
 import glob
 import os
 import time
@@ -222,7 +223,10 @@ class Sender(object):
                 start_sample = time.time()
 
             action = self.sample_action(state)
-            os.system("echo "+"{:04d}".format(self.thid)+ '\t' +str(time.time()) + '\t'+str(self.delay_ewma)+'\t'+str(self.delivery_rate_ewma)+'\t'+str(self.send_rate_ewma)+'\t'+str(self.cwnd) +">> logx/"+line_algo+"-state.txt") 
+            #os.system() 
+            ##scriptx = "echo "+"{:04d}".format(self.thid)+ '\t' +str(time.time()) + '\t'+str(self.delay_ewma)+'\t'+str(self.delivery_rate_ewma)+'\t'+str(self.send_rate_ewma)+'\t'+str(self.cwnd) +">> logx/"+line_algo+"-state.txt"
+            ##proc = subprocess.Popen(scriptx,stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
+            #(out, err) = proc.communicate()
             if self.debug:
                 self.sampling_file.write('%.2f ms\n' % ((time.time() - start_sample) * 1000))
 
@@ -288,7 +292,10 @@ class Sender(object):
                                 #
                                 self.send()
                                 os.system("mv "+ fname + ' ' +  fname.replace("IN.txt", "D.txt"))
-                                os.system("echo "+"{:04d}".format(self.thid)+ '\t' +str(time.time()) +'\t'+str(self.cwnd) +">> logx/"+line_algo+".txt") 
+                                #os.system() 
+                                ##scriptx = "echo "+"{:04d}".format(self.thid)+ '\t' +str(time.time()) +'\t'+str(self.cwnd) +">> logx/"+line_algo+".txt"
+                                ##proc = subprocess.Popen(scriptx,stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
+                                #(out, err) = proc.communicate()
                             else:
                                 path_here='data/'+"{:04d}".format(self.thid)+'*_D.txt'
                                 l2x=sorted(glob.glob(path_here))

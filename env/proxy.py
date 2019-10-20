@@ -100,13 +100,13 @@ def find_free_port():
 #*******************************************
 def proxy_thread0():
     while True:
-        print("yyy")
+        #print("yyy")
 
         path_here='data/'+'DONE.txt'
         l=sorted(glob.glob(path_here))
         if(len(l)>0):
              os._exit(1) #sys.exit(1)
-        time.sleep(1)
+        #time.sleep(1)
 
 	
 def proxy_thread2(TH_ID,conn,ooo):
