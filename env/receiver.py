@@ -14,6 +14,7 @@
 
 import time
 import os
+import os.path
 import glob
 import sys
 import json
@@ -98,6 +99,21 @@ class Receiver(object):
                             # received subsequent data from peer sender
                             ack = self.construct_ack_from_data(msg)
                             if ack is not None:
+                                print("\n\n\n********************\nHERE WE GO\n***********************\n\n\n")
+                                '''filepath = '/home/arramli/aaa-last/list.txt'
+                                if os.path.isfile(filepath):
+                                    fp = open(filepath, "r")
+                                    line = fp.readline().strip()
+                                    fp.close()
+                                    line_time=int(line)/1000.0
+                                    ############# DELAY ##############
+                                    ############# DELAY ##############
+                                    ############# DELAY ##############
+                                    time.sleep(line_time) # 0.050 =50ms
+                                    ############# DELAY ##############
+                                    ############# DELAY ##############
+                                    ############# DELAY ############## 
+                                '''
                                 self.sock.sendto(ack, self.peer_addr)
                         return
 
